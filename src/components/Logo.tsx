@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 interface LogoProps {
   size?: "sm" | "md" | "lg" | "xl";
@@ -10,84 +11,109 @@ interface LogoProps {
 }
 
 export function Logo({ size = "md", showText = true, className = "", animated = false }: LogoProps) {
-  const sizes = {
-    sm: { box: 28, text: "text-sm" },
-    md: { box: 40, text: "text-base" },
-    lg: { box: 56, text: "text-xl" },
-    xl: { box: 80, text: "text-3xl" },
+  const dimensions = {
+    sm: { height: 32, textClass: "text-sm", subtitleClass: "text-[9px]" },
+    md: { height: 44, textClass: "text-base", subtitleClass: "text-[10px]" },
+    lg: { height: 60, textClass: "text-xl", subtitleClass: "text-[11px]" },
+    xl: { height: 90, textClass: "text-3xl", subtitleClass: "text-[13px]" },
   };
 
-  const { box, text } = sizes[size];
+  const { height, textClass, subtitleClass } = dimensions[size];
 
-  const LogoMark = (
-    <svg
-      width={box}
-      height={box}
-      viewBox="0 0 80 80"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className="shrink-0"
-    >
-      <defs>
-        <linearGradient id="fd-logo-gradient" x1="0" y1="0" x2="80" y2="80" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#0F5FFF" />
-          <stop offset="50%" stopColor="#00C8FF" />
-          <stop offset="100%" stopColor="#5B8CFF" />
-        </linearGradient>
-        <linearGradient id="fd-gold" x1="0" y1="0" x2="80" y2="80" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#FFD700" />
-          <stop offset="100%" stopColor="#FF9500" />
-        </linearGradient>
-      </defs>
-      {/* Background rounded square */}
-      <rect x="2" y="2" width="76" height="76" rx="20" fill="url(#fd-logo-gradient)" />
-      <rect x="2" y="2" width="76" height="76" rx="20" stroke="rgba(255,255,255,0.3)" strokeWidth="1" />
-      {/* Film strip marks */}
-      <circle cx="14" cy="16" r="2" fill="rgba(255,255,255,0.7)" />
-      <circle cx="66" cy="16" r="2" fill="rgba(255,255,255,0.7)" />
-      <circle cx="14" cy="64" r="2" fill="rgba(255,255,255,0.7)" />
-      <circle cx="66" cy="64" r="2" fill="rgba(255,255,255,0.7)" />
-      {/* 4D text */}
-      <text
-        x="40"
-        y="52"
-        textAnchor="middle"
-        fontFamily="Plus Jakarta Sans, Inter, sans-serif"
-        fontWeight="800"
-        fontSize="34"
-        fill="white"
-        letterSpacing="-2"
-      >
-        4D
-      </text>
-      {/* Gold accent bar */}
-      <rect x="22" y="58" width="36" height="3" rx="1.5" fill="url(#fd-gold)" />
-    </svg>
-  );
-
-  return (
-    <div className={`flex items-center gap-3 ${className}`}>
-      {animated ? (
-        <motion.div
-          initial={{ scale: 0.8, rotate: -10 }}
-          animate={{ scale: 1, rotate: 0 }}
-          transition={{ type: "spring", stiffness: 200, damping: 15 }}
+  const LogoContent = (
+    <div className={`flex items-center gap-3.5 ${className}`}>
+      {/* Metallic 4D Film Reel Logo Mark */}
+      <div className="relative flex items-center justify-center shrink-0">
+        <svg
+          style={{ height: `${height}px`, width: "auto" }}
+          viewBox="0 0 240 120"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          className="drop-shadow-md"
         >
-          {LogoMark}
-        </motion.div>
-      ) : (
-        LogoMark
-      )}
+          <defs>
+            <linearGradient id="metallic-silver-mark" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#4A616E" />
+              <stop offset="30%" stopColor="#C4D3D9" />
+              <stop offset="50%" stopColor="#FFFFFF" />
+              <stop offset="70%" stopColor="#8DA3AF" />
+              <stop offset="100%" stopColor="#2B3E48" />
+            </linearGradient>
+            <linearGradient id="reel-dark-rim" x1="100%" y1="100%" x2="0%" y2="0%">
+              <stop offset="0%" stopColor="#1B2931" />
+              <stop offset="100%" stopColor="#526873" />
+            </linearGradient>
+          </defs>
+
+          {/* 4 */}
+          <path
+            d="M 68,22 L 20,92 L 68,92 L 68,110 L 88,110 L 88,92 L 105,92 L 105,74 L 88,74 L 88,22 Z M 68,44 L 68,74 L 38,74 Z"
+            fill="url(#metallic-silver-mark)"
+            stroke="#2B3E48"
+            strokeWidth="1.5"
+          />
+
+          {/* D Outer Curve */}
+          <path
+            d="M 98,22 L 140,22 C 190,22 222,48 222,66 C 222,84 190,110 140,110 L 98,110 Z"
+            fill="url(#metallic-silver-mark)"
+            stroke="#2B3E48"
+            strokeWidth="1.5"
+          />
+
+          {/* D Inner Counter */}
+          <path
+            d="M 118,40 L 140,40 C 170,40 198,54 198,66 C 198,78 170,92 140,92 L 118,92 Z"
+            fill="#FFFFFF"
+          />
+
+          {/* Film Reel inside D Center */}
+          <g transform="translate(152, 66)">
+            <circle r="36" fill="url(#metallic-silver-mark)" stroke="#2B3E48" strokeWidth="2" />
+            <circle r="32" fill="url(#reel-dark-rim)" />
+            <circle r="30" fill="url(#metallic-silver-mark)" />
+            <circle r="22" fill="#1B2A32" />
+
+            {/* 6 Holes */}
+            <circle cx="0" cy="-14" r="5.5" fill="#EBF2F5" stroke="#4A616E" strokeWidth="0.8" />
+            <circle cx="12" cy="-7" r="5.5" fill="#EBF2F5" stroke="#4A616E" strokeWidth="0.8" />
+            <circle cx="12" cy="7" r="5.5" fill="#EBF2F5" stroke="#4A616E" strokeWidth="0.8" />
+            <circle cx="0" cy="14" r="5.5" fill="#EBF2F5" stroke="#4A616E" strokeWidth="0.8" />
+            <circle cx="-12" cy="7" r="5.5" fill="#EBF2F5" stroke="#4A616E" strokeWidth="0.8" />
+            <circle cx="-12" cy="-7" r="5.5" fill="#EBF2F5" stroke="#4A616E" strokeWidth="0.8" />
+
+            <circle r="8" fill="url(#metallic-silver-mark)" stroke="#1B2A32" strokeWidth="1" />
+            <circle r="4" fill="#1B2A32" />
+            <circle r="1.5" fill="#FFFFFF" />
+          </g>
+        </svg>
+      </div>
+
       {showText && (
-        <div className="flex flex-col leading-tight">
-          <span className={`font-display font-bold ${text} tracking-tight text-slate-900`}>
+        <div className="flex flex-col leading-none">
+          <span className={`font-display font-extrabold ${textClass} tracking-[0.12em] text-slate-900 uppercase`}>
             Four Dee
           </span>
-          <span className="text-[10px] font-medium uppercase tracking-[0.15em] text-brand-500">
+          <span className={`font-semibold ${subtitleClass} tracking-[0.25em] text-slate-500 uppercase mt-1`}>
             Motion Pictures
           </span>
         </div>
       )}
     </div>
   );
+
+  if (animated) {
+    return (
+      <motion.div
+        initial={{ scale: 0.95, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ type: "spring", stiffness: 200, damping: 15 }}
+      >
+        {LogoContent}
+      </motion.div>
+    );
+  }
+
+  return LogoContent;
 }
+
