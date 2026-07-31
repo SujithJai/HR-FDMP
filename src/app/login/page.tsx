@@ -85,7 +85,7 @@ export default function LoginPage() {
           transition={{ duration: 0.6 }}
           className="hidden lg:block space-y-8 text-slate-800"
         >
-          <Logo size="lg" />
+          <Logo size="xl" />
 
           <div className="space-y-4">
             <motion.h1

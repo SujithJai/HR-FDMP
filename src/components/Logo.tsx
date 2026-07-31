@@ -11,10 +11,10 @@ interface LogoProps {
 
 export function Logo({ size = "md", showText = true, className = "", animated = false }: LogoProps) {
   const heights = {
-    sm: "h-8",
-    md: "h-12",
-    lg: "h-16",
-    xl: "h-24",
+    sm: "h-12",
+    md: "h-20",
+    lg: "h-32",
+    xl: "h-44",
   };
 
   const imgHeight = heights[size];
@@ -24,7 +24,7 @@ export function Logo({ size = "md", showText = true, className = "", animated = 
       <img
         src="/logo.png"
         alt="Four Dee Motion Pictures"
-        className={`${imgHeight} w-auto object-contain drop-shadow-md`}
+        className={`${imgHeight} max-w-full w-auto object-contain drop-shadow-lg`}
       />
     </div>
   );
