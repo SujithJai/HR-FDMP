@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { FileText, Plus, X, CheckCircle2, Clock, AlertTriangle, Star } from "lucide-react";
+import { FileText, Plus, X, CheckCircle2, Clock, AlertTriangle, Star, FileSpreadsheet } from "lucide-react";
 import { ModulePage } from "@/components/ModulePage";
 
 interface DailyReportItem {
@@ -17,9 +17,28 @@ interface DailyReportItem {
 }
 
 const INITIAL_REPORTS: DailyReportItem[] = [
-  { id: "REP-01", employeeName: "Arjun Kapoor", avatar: "https://i.pravatar.cc/150?img=12", department: "Executive", date: "Today", hoursWorked: 9, tasksCompleted: "Reviewed Kaal Teaser v2 cut, approved marketing budget for Q3.", blockers: "None", productivityScore: 98 },
-  { id: "REP-02", employeeName: "Rahul Verma", avatar: "https://i.pravatar.cc/150?img=8", department: "Cinematography", date: "Today", hoursWorked: 8.5, tasksCompleted: "Completed lighting test for Cyber City EP2 night sequence.", blockers: "Outdoor generator power glitch on set B.", productivityScore: 92 },
-  { id: "REP-03", employeeName: "Ananya Rao", avatar: "https://i.pravatar.cc/150?img=9", department: "VFX", date: "Today", hoursWorked: 9.5, tasksCompleted: "Finished 3D CG creature composite render for Scene 14.", blockers: "Heavy GPU rendering queue backlog.", productivityScore: 95 },
+  {
+    id: "REP-01",
+    employeeName: "Surjith Thangavel (Media Manager)",
+    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80",
+    department: "Digital Marketing & Branding",
+    date: "Today",
+    hoursWorked: 9,
+    tasksCompleted: "Launched Digital Marketing campaign for Project Kaal Teaser. Optimized Google Ads & Meta Branding reach by +35%.",
+    blockers: "None",
+    productivityScore: 98,
+  },
+  {
+    id: "REP-02",
+    employeeName: "Surjith Thangavel (Media Manager)",
+    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80",
+    department: "Digital Marketing & Branding",
+    date: "Yesterday",
+    hoursWorked: 8.5,
+    tasksCompleted: "Finalized social media poster release schedule & branding asset guidelines for Q3.",
+    blockers: "Waiting for high-res VFX poster render.",
+    productivityScore: 94,
+  },
 ];
 
 export default function DailyReportsPage() {
@@ -27,10 +46,23 @@ export default function DailyReportsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     tasksCompleted: "",
-    hoursWorked: "8",
+    hoursWorked: "9",
     blockers: "None",
-    score: "95",
+    score: "98",
   });
+
+  const handleExportCSV = () => {
+    const headers = ["ID,Employee,Department,Date,Hours Worked,Tasks Completed,Blockers,Productivity Score"];
+    const rows = reports.map(r => `${r.id},"${r.employeeName}",${r.department},${r.date},${r.hoursWorked},"${r.tasksCompleted}","${r.blockers}",${r.productivityScore}`);
+    const csvContent = "data:text/csv;charset=utf-8," + [headers, ...rows].join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `Surjith_Thangavel_Daily_Work_Reports_GoogleSheet_${new Date().toISOString().split("T")[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const handleSubmitReport = (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,40 +70,54 @@ export default function DailyReportsPage() {
 
     const newRep: DailyReportItem = {
       id: `REP-0${reports.length + 1}`,
-      employeeName: "You (Sujai Director)",
-      avatar: "https://i.pravatar.cc/150?img=60",
-      department: "Production",
+      employeeName: "Surjith Thangavel (Media Manager)",
+      avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80",
+      department: "Digital Marketing & Branding",
       date: "Today",
-      hoursWorked: Number(formData.hoursWorked) || 8,
+      hoursWorked: Number(formData.hoursWorked) || 9,
       tasksCompleted: formData.tasksCompleted,
       blockers: formData.blockers || "None",
-      productivityScore: Number(formData.score) || 95,
+      productivityScore: Number(formData.score) || 98,
     };
 
     setReports([newRep, ...reports]);
     setIsModalOpen(false);
-    setFormData({ tasksCompleted: "", hoursWorked: "8", blockers: "None", score: "95" });
+    setFormData({ tasksCompleted: "", hoursWorked: "9", blockers: "None", score: "98" });
   };
 
   return (
     <ModulePage
       title="Daily Work Reports"
-      subtitle="Log daily production achievements, track hours worked, and flag blockers"
+      subtitle="Log daily digital marketing & media achievements, track hours, and export to Google Sheets"
       icon={<FileText className="w-6 h-6 text-white" />}
-      actionLabel="Submit Daily Report"
+      actionLabel="Submit Daily Work Report"
       onAction={() => setIsModalOpen(true)}
     >
+      {/* Control Actions Bar */}
+      <div className="flex items-center justify-between bg-slate-50/80 p-4 rounded-2xl border border-slate-200/60">
+        <div>
+          <h4 className="font-display font-bold text-slate-900">Work Logs: Surjith Thangavel</h4>
+          <p className="text-xs text-slate-500">Media Manager ( Digital Marketing & Branding )</p>
+        </div>
+        <button
+          onClick={handleExportCSV}
+          className="btn-premium px-4 py-2 text-xs font-semibold rounded-xl inline-flex items-center gap-2"
+        >
+          <FileSpreadsheet className="w-4 h-4" /> Download Google Sheet / CSV
+        </button>
+      </div>
+
       {/* Metrics */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: "Submitted Today", value: `${reports.length} Reports`, color: "from-brand-500 to-cyan-400" },
-          { label: "Avg Productivity Score", value: "95 / 100", color: "from-emerald-500 to-teal-500" },
-          { label: "Total Hours Logged", value: "32.5 Hours", color: "from-purple-500 to-pink-500" },
-          { label: "Active Set Blockers", value: "1 Flagged", color: "from-amber-500 to-orange-500" },
+          { label: "Submitted Logs", value: `${reports.length} Reports`, color: "from-brand-500 to-cyan-400" },
+          { label: "Avg Productivity Score", value: "98 / 100", color: "from-emerald-500 to-teal-500" },
+          { label: "Total Hours Logged", value: "17.5 Hours", color: "from-purple-500 to-pink-500" },
+          { label: "Spreadsheet Export", value: "Ready ✓", color: "from-amber-500 to-orange-500" },
         ].map((stat) => (
           <div key={stat.label} className="card-3d rounded-[22px] p-5">
             <div className="text-sm text-slate-500 font-medium">{stat.label}</div>
-            <div className="font-display text-2xl font-bold text-slate-900 mt-1">{stat.value}</div>
+            <div className="font-display text-xl font-bold text-slate-900 mt-1">{stat.value}</div>
           </div>
         ))}
       </div>
@@ -82,7 +128,7 @@ export default function DailyReportsPage() {
           <div key={rep.id} className="card-3d rounded-[22px] p-6 space-y-4">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
-                <img src={rep.avatar} alt={rep.employeeName} className="w-12 h-12 rounded-2xl object-cover ring-2 ring-white shadow-sm" />
+                <img src={rep.avatar} alt={rep.employeeName} className="w-12 h-12 rounded-2xl object-cover ring-2 ring-brand-100 shadow-sm" />
                 <div>
                   <h4 className="font-display font-bold text-slate-900">{rep.employeeName}</h4>
                   <p className="text-xs text-slate-500">{rep.department} • Logged {rep.date}</p>
@@ -108,7 +154,7 @@ export default function DailyReportsPage() {
 
               <div className="bg-slate-50/80 p-4 rounded-2xl">
                 <div className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 flex items-center gap-1.5">
-                  <AlertTriangle className="w-4 h-4 text-amber-500" /> Blockers / Issues
+                  <AlertTriangle className="w-4 h-4 text-amber-500" /> Blockers / Dependencies
                 </div>
                 <p className={rep.blockers.toLowerCase().includes("none") ? "text-slate-500" : "text-amber-700 font-medium"}>
                   {rep.blockers}
@@ -125,7 +171,7 @@ export default function DailyReportsPage() {
           <div className="bg-white rounded-3xl p-6 w-full max-w-lg shadow-2xl relative">
             <div className="flex items-center justify-between mb-4 border-b pb-3">
               <h3 className="font-display font-bold text-xl text-slate-900 flex items-center gap-2">
-                <Plus className="w-5 h-5 text-brand-500" /> Submit Daily Work Report
+                <Plus className="w-5 h-5 text-brand-500" /> Submit Work Report
               </h3>
               <button onClick={() => setIsModalOpen(false)} className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-400">
                 <X className="w-5 h-5" />
@@ -140,7 +186,7 @@ export default function DailyReportsPage() {
                   value={formData.tasksCompleted}
                   onChange={(e) => setFormData({ ...formData, tasksCompleted: e.target.value })}
                   className="w-full mt-1 px-3 py-2 border rounded-xl text-sm"
-                  placeholder="Detail the work and milestones finished today..."
+                  placeholder="Detail campaign results, social media posts, branding deliverables..."
                 />
               </div>
 
@@ -154,17 +200,17 @@ export default function DailyReportsPage() {
                     value={formData.hoursWorked}
                     onChange={(e) => setFormData({ ...formData, hoursWorked: e.target.value })}
                     className="w-full mt-1 px-3 py-2 border rounded-xl text-sm"
-                    placeholder="8.5"
+                    placeholder="9"
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-slate-700">Self Rating Score (0-100)</label>
+                  <label className="text-xs font-semibold text-slate-700">Self Rating (0-100)</label>
                   <input
                     type="number"
                     value={formData.score}
                     onChange={(e) => setFormData({ ...formData, score: e.target.value })}
                     className="w-full mt-1 px-3 py-2 border rounded-xl text-sm"
-                    placeholder="95"
+                    placeholder="98"
                   />
                 </div>
               </div>
@@ -176,7 +222,7 @@ export default function DailyReportsPage() {
                   value={formData.blockers}
                   onChange={(e) => setFormData({ ...formData, blockers: e.target.value })}
                   className="w-full mt-1 px-3 py-2 border rounded-xl text-sm"
-                  placeholder="e.g. Waiting for VFX asset render"
+                  placeholder="None"
                 />
               </div>
 
