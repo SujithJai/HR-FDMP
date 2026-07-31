@@ -142,6 +142,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         photo_url: null,
       };
 
+      if (typeof window !== "undefined") {
+        document.cookie = "demo_auth=true; path=/; max-age=86400";
+      }
       setUser(demoUser);
       setSession(demoSession);
       setEmployee(demoEmployee);
@@ -182,6 +185,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           photo_url: null,
         };
 
+        if (typeof window !== "undefined") {
+          document.cookie = "demo_auth=true; path=/; max-age=86400";
+        }
         setUser(demoUser);
         setSession(demoSession);
         setEmployee(demoEmployee);
@@ -192,14 +198,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       throw new Error(error.message);
     }
 
+    if (typeof window !== "undefined") {
+      document.cookie = "demo_auth=true; path=/; max-age=86400";
+    }
     setSession(data.session);
     setUser(data.user);
     if (data.user) {
       await fetchEmployee(data.user.id);
     }
+    router.push("/dashboard");
   };
 
   const signOut = async () => {
+    if (typeof window !== "undefined") {
+      document.cookie = "demo_auth=; path=/; max-age=0";
+    }
     if (supabase) {
       await supabase.auth.signOut();
     }

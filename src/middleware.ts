@@ -44,17 +44,20 @@ export async function middleware(request: NextRequest) {
   );
 
   try {
+    const hasDemoCookie = request.cookies.get("demo_auth")?.value === "true";
     const { data: { session } } = await supabase.auth.getSession();
 
-    // If it's a protected route and no session, redirect to login
-    if (!isPublicPage && !isPublicApi && !session) {
+    const isAuthenticated = !!session || hasDemoCookie;
+
+    // If it's a protected route and no session/demo cookie, redirect to login
+    if (!isPublicPage && !isPublicApi && !isAuthenticated) {
       const loginUrl = new URL("/login", request.url);
       loginUrl.searchParams.set("redirectedFrom", pathname);
       return NextResponse.redirect(loginUrl);
     }
 
     // If user is logged in and trying to access login page, redirect to dashboard
-    if (isPublicPage && session && pathname !== "/") {
+    if (isPublicPage && isAuthenticated && pathname !== "/") {
       const dashboardUrl = new URL("/dashboard", request.url);
       return NextResponse.redirect(dashboardUrl);
     }
