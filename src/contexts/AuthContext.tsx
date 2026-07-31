@@ -27,11 +27,10 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Check if Supabase is configured
 function isSupabaseConfigured(): boolean {
-  const url = typeof window !== "undefined" ? process.env.NEXT_PUBLIC_SUPABASE_URL : "";
-  const key = typeof window !== "undefined" ? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY : "";
-  return !!(url && key && url !== "https://YOUR_PROJECT_ID.supabase.co" && key !== "YOUR_SUPABASE_ANON_KEY");
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  return !!(url && key && url.includes("supabase.co") && !url.includes("YOUR_PROJECT_ID"));
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
