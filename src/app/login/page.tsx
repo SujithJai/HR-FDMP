@@ -172,7 +172,7 @@ export default function LoginPage() {
           className="glass-strong rounded-[28px] p-8 md:p-10 shadow-2xl"
         >
           <div className="lg:hidden mb-6">
-            <Logo size="md" />
+            <Logo size="lg" />
           </div>
 
           {/* Supabase Setup Banner (Mobile) */}
