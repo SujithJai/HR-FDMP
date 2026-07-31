@@ -80,10 +80,10 @@ export async function POST(request: NextRequest) {
     if (process.env.DATABASE_URL) {
       try {
         await db.insert(assets).values({
-          assetCode: newAsset.assetCode,
           name: newAsset.name,
-          category: newAsset.category,
-          status: "active",
+          type: "video",
+          fileUrl: "/assets/sample.mp4",
+          approvalStatus: "approved",
         });
       } catch (dbErr) {
         console.warn("Could not insert asset into DB:", dbErr);

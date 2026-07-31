@@ -98,13 +98,14 @@ export async function POST(request: NextRequest) {
     if (process.env.DATABASE_URL) {
       try {
         await db.insert(employees).values({
+          userId: crypto.randomUUID(),
           employeeCode: newEmp.employeeCode,
           firstName: newEmp.firstName,
           lastName: newEmp.lastName,
           email: newEmp.email,
           department: newEmp.department,
           designation: newEmp.designation,
-          joiningDate: new Date(newEmp.joiningDate),
+          joiningDate: newEmp.joiningDate,
           status: "active",
         });
       } catch (dbErr) {

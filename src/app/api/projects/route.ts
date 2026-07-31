@@ -84,10 +84,10 @@ export async function POST(request: NextRequest) {
     if (process.env.DATABASE_URL) {
       try {
         await db.insert(projects).values({
-          projectCode: newProject.projectCode,
-          title: newProject.title,
-          type: newProject.type,
-          stage: newProject.stage,
+          code: newProject.projectCode,
+          name: newProject.title,
+          type: "movie",
+          stage: "pre_production",
           budget: newProject.budget.toString(),
           spent: newProject.spent.toString(),
           status: "active",
