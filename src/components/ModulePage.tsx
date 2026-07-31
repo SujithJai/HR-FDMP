@@ -11,10 +11,11 @@ interface ModulePageProps {
   subtitle?: string;
   icon?: ReactNode;
   actionLabel?: string;
+  onAction?: () => void;
   children: ReactNode;
 }
 
-export function ModulePage({ title, subtitle, icon, actionLabel, children }: ModulePageProps) {
+export function ModulePage({ title, subtitle, icon, actionLabel, onAction, children }: ModulePageProps) {
   return (
     <div className="min-h-screen">
       <Sidebar />
@@ -57,7 +58,7 @@ export function ModulePage({ title, subtitle, icon, actionLabel, children }: Mod
                 <Download className="w-5 h-5" />
               </button>
               {actionLabel && (
-                <button className="btn-premium px-4 py-2.5 font-semibold text-sm flex items-center gap-2">
+                <button onClick={onAction} className="btn-premium px-4 py-2.5 font-semibold text-sm flex items-center gap-2">
                   <Plus className="w-4 h-4" />
                   {actionLabel}
                 </button>
