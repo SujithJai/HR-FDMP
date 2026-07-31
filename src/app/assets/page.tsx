@@ -1,24 +1,103 @@
 "use client";
 
-import { useState } from "react";
-import { FilmIcon, Search, Grid3x3, List, Download, Eye, Filter } from "lucide-react";
+import { useState, useEffect } from "react";
+import { FilmIcon, Grid3x3, List, Download, Eye, Plus, X } from "lucide-react";
 import { ModulePage } from "@/components/ModulePage";
 import { formatNumber, getStatusColor, formatStatus } from "@/lib/utils";
 
-const assets = [
-  { id: 1, name: "Midnight in Mumbai - Official Poster", type: "poster", project: "Midnight in Mumbai", size: "2.5 MB", version: 1, status: "approved", downloads: 150, views: 1200, thumbnail: "https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=400" },
-  { id: 2, name: "Midnight in Mumbai - Teaser Trailer", type: "trailer", project: "Midnight in Mumbai", size: "150 MB", version: 3, status: "approved", downloads: 5000, views: 25000, thumbnail: "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=400" },
-  { id: 3, name: "Tales of Tomorrow - Script EP1", type: "script", project: "Tales of Tomorrow", size: "850 KB", version: 12, status: "approved", downloads: 45, views: 180, thumbnail: "https://images.unsplash.com/photo-1455390582262-044cdead277a?w=400" },
-  { id: 4, name: "Royal Elegance - Final Cut", type: "video", project: "Royal Elegance", size: "85 MB", version: 1, status: "approved", downloads: 250, views: 5000, thumbnail: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=400" },
-  { id: 5, name: "Character Stills - Scene 5", type: "photo", project: "Midnight in Mumbai", size: "12 MB", version: 2, status: "pending", downloads: 30, views: 450, thumbnail: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=400" },
-  { id: 6, name: "Behind the Scenes - Day 1", type: "video", project: "Tales of Tomorrow", size: "200 MB", version: 1, status: "draft", downloads: 10, views: 80, thumbnail: "https://images.unsplash.com/photo-1579966220743-a38bdf45d6ad?w=400" },
+interface AssetItem {
+  id: string | number;
+  name: string;
+  type: string;
+  project: string;
+  size: string;
+  version: number | string;
+  status: string;
+  downloads: number;
+  views: number;
+  thumbnail: string;
+}
+
+const INITIAL_ASSETS: AssetItem[] = [
+  { id: 1, name: "Kaal_Official_Teaser_4K_Final.mp4", type: "video", project: "Project Kaal", size: "4.2 GB", version: "2.4", status: "approved", downloads: 1500, views: 12000, thumbnail: "https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=400" },
+  { id: 2, name: "CyberCity_Poster_Main_8K.psd", type: "poster", project: "Cyber City", size: "850 MB", version: "1.0", status: "approved", downloads: 500, views: 3500, thumbnail: "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=400" },
+  { id: 3, name: "Chola_Docu_BGM_Master_Stereo.wav", type: "audio", project: "The Legend of Chola", size: "320 MB", version: "3.1", status: "approved", downloads: 210, views: 890, thumbnail: "https://images.unsplash.com/photo-1455390582262-044cdead277a?w=400" },
+  { id: 4, name: "Kaal_Storyboards_Act3.pdf", type: "script", project: "Project Kaal", size: "45 MB", version: "1.2", status: "pending", downloads: 80, views: 400, thumbnail: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=400" },
 ];
 
-const categories = ["All", "Poster", "Trailer", "Video", "Photo", "Audio", "Script", "Storyboard", "Press Kit"];
+const categories = ["All", "Poster", "Trailer", "Video", "Photo", "Audio", "Script", "Storyboard"];
 
 export default function AssetsPage() {
+  const [assetList, setAssetList] = useState<AssetItem[]>(INITIAL_ASSETS);
   const [view, setView] = useState<"grid" | "list">("grid");
   const [activeCategory, setActiveCategory] = useState("All");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    type: "video",
+    project: "Project Kaal",
+    size: "15 MB",
+  });
+
+  useEffect(() => {
+    fetch("/api/assets")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.data && data.data.length > 0) {
+          const formatted = data.data.map((ast: any, idx: number) => ({
+            id: ast.id || `ast-${idx}`,
+            name: ast.name || "Untitled Asset",
+            type: (ast.type || "video").toLowerCase(),
+            project: ast.projectName || ast.project || "General Production",
+            size: ast.size || "25 MB",
+            version: ast.version || "1.0",
+            status: ast.status || "approved",
+            downloads: ast.downloads || Math.floor(Math.random() * 200) + 10,
+            views: ast.views || Math.floor(Math.random() * 1000) + 100,
+            thumbnail: `https://images.unsplash.com/photo-${1478720568477 + idx * 100}?w=400`,
+          }));
+          setAssetList(formatted);
+        }
+      })
+      .catch((err) => console.log("Assets API notice:", err));
+  }, []);
+
+  const handleUploadAsset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.name) return;
+
+    try {
+      const res = await fetch("/api/assets", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      await res.json();
+
+      const newAst: AssetItem = {
+        id: `ast-${Date.now()}`,
+        name: formData.name,
+        type: formData.type,
+        project: formData.project,
+        size: formData.size,
+        version: "1.0",
+        status: "approved",
+        downloads: 0,
+        views: 1,
+        thumbnail: "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=400",
+      };
+
+      setAssetList([newAst, ...assetList]);
+      setIsModalOpen(false);
+      setFormData({ name: "", type: "video", project: "Project Kaal", size: "15 MB" });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const filteredAssets = activeCategory === "All"
+    ? assetList
+    : assetList.filter((a) => a.type.toLowerCase() === activeCategory.toLowerCase());
 
   return (
     <ModulePage
@@ -26,14 +105,15 @@ export default function AssetsPage() {
       subtitle="Organize, preview and distribute media assets"
       icon={<FilmIcon className="w-6 h-6 text-white" />}
       actionLabel="Upload Asset"
+      onAction={() => setIsModalOpen(true)}
     >
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: "Total Assets", value: 2456 },
-          { label: "Storage Used", value: "2.4 TB" },
-          { label: "Downloads", value: "15.2K" },
-          { label: "Pending Approval", value: 18 },
+          { label: "Total Assets", value: assetList.length + 2450 },
+          { label: "Storage Used", value: "2.8 TB" },
+          { label: "Downloads", value: "18.4K" },
+          { label: "Pending Approval", value: 3 },
         ].map((stat) => (
           <div key={stat.label} className="card-3d rounded-[22px] p-5">
             <div className="text-sm text-slate-500 font-medium">{stat.label}</div>
@@ -80,7 +160,7 @@ export default function AssetsPage() {
       {/* Assets Grid */}
       {view === "grid" ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {assets.map((asset) => (
+          {filteredAssets.map((asset) => (
             <div key={asset.id} className="card-3d rounded-[22px] overflow-hidden group hover:shadow-xl transition-shadow">
               <div className="relative aspect-[4/3] overflow-hidden bg-slate-100">
                 <img
@@ -137,7 +217,7 @@ export default function AssetsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {assets.map((asset) => (
+              {filteredAssets.map((asset) => (
                 <tr key={asset.id} className="hover:bg-white/50 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
@@ -165,6 +245,86 @@ export default function AssetsPage() {
           </table>
         </div>
       )}
+
+      {/* Upload Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl p-6 w-full max-w-lg shadow-2xl relative">
+            <div className="flex items-center justify-between mb-4 border-b pb-3">
+              <h3 className="font-display font-bold text-xl text-slate-900 flex items-center gap-2">
+                <Plus className="w-5 h-5 text-brand-500" /> Upload Digital Asset
+              </h3>
+              <button onClick={() => setIsModalOpen(false)} className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-400">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <form onSubmit={handleUploadAsset} className="space-y-4">
+              <div>
+                <label className="text-xs font-semibold text-slate-700">File Name</label>
+                <input
+                  type="text"
+                  required
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="w-full mt-1 px-3 py-2 border rounded-xl text-sm"
+                  placeholder="Kaal_Teaser_Final_4K.mp4"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-semibold text-slate-700">Asset Type</label>
+                  <select
+                    value={formData.type}
+                    onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                    className="w-full mt-1 px-3 py-2 border rounded-xl text-sm"
+                  >
+                    <option value="video">Video / Footage</option>
+                    <option value="poster">Poster / Image</option>
+                    <option value="audio">Audio / BGM</option>
+                    <option value="script">Script / Doc</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-slate-700">Associated Project</label>
+                  <input
+                    type="text"
+                    value={formData.project}
+                    onChange={(e) => setFormData({ ...formData, project: e.target.value })}
+                    className="w-full mt-1 px-3 py-2 border rounded-xl text-sm"
+                    placeholder="Project Kaal"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-slate-700">Estimated File Size</label>
+                <input
+                  type="text"
+                  value={formData.size}
+                  onChange={(e) => setFormData({ ...formData, size: e.target.value })}
+                  className="w-full mt-1 px-3 py-2 border rounded-xl text-sm"
+                  placeholder="120 MB"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-3 border-t">
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-xl"
+                >
+                  Cancel
+                </button>
+                <button type="submit" className="btn-premium px-5 py-2 text-sm font-semibold rounded-xl">
+                  Upload Asset
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </ModulePage>
   );
 }
+

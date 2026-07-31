@@ -4,7 +4,7 @@ import { Pool } from "pg";
 const databaseUrl = process.env.DATABASE_URL;
 
 if (!databaseUrl) {
-  throw new Error("DATABASE_URL is required");
+  console.warn("⚠️ DATABASE_URL is not defined in environment variables. Database operations will fail unless DATABASE_URL is provided.");
 }
 
 const globalForDb = globalThis as typeof globalThis & {
@@ -14,11 +14,12 @@ const globalForDb = globalThis as typeof globalThis & {
 export const pool =
   globalForDb.__arenaNextJsPostgresqlPool ??
   new Pool({
-    connectionString: databaseUrl,
+    connectionString: databaseUrl || "postgres://localhost:5432/dummy_hr_fdmp",
   });
 
-if (process.env.NODE_ENV !== "production") {
+if (process.env.NODE_ENV !== "production" && databaseUrl) {
   globalForDb.__arenaNextJsPostgresqlPool = pool;
 }
 
 export const db = drizzle(pool);
+

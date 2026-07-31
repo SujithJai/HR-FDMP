@@ -20,11 +20,6 @@ export default function LoginPage() {
     e.preventDefault();
     setError("");
 
-    if (!isSupabaseReady) {
-      setError("Supabase is not configured yet. Update the .env file with your Supabase credentials to enable authentication.");
-      return;
-    }
-
     setLoading(true);
     try {
       await signIn(email, password);
@@ -268,10 +263,10 @@ export default function LoginPage() {
 
             <button
               type="submit"
-              disabled={loading || !isSupabaseReady}
+              disabled={loading}
               className="w-full btn-premium py-4 font-semibold text-base disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {loading ? "Signing in..." : isSupabaseReady ? "Sign in to Workspace" : "Configure Supabase First"}
+              {loading ? "Signing in..." : "Sign in to Workspace"}
             </button>
           </form>
 
@@ -292,11 +287,19 @@ export default function LoginPage() {
                 <button
                   key={account.email}
                   type="button"
-                  onClick={() => {
+                  onClick={async () => {
                     setEmail(account.email);
                     setPassword("demo123");
+                    setLoading(true);
+                    try {
+                      await signIn(account.email, "demo123");
+                    } catch (err) {
+                      setError(err instanceof Error ? err.message : "Login failed");
+                    } finally {
+                      setLoading(false);
+                    }
                   }}
-                  className="p-3 rounded-xl border border-white/80 bg-white/50 hover:bg-white/80 transition-all text-left group"
+                  className="p-3 rounded-xl border border-white/80 bg-white/50 hover:bg-white/80 transition-all text-left group cursor-pointer"
                 >
                   <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${account.color} mb-2 group-hover:scale-110 transition-transform`} />
                   <div className="text-xs font-semibold text-slate-900">{account.role}</div>

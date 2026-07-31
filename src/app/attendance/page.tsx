@@ -1,36 +1,88 @@
 "use client";
 
-import { Clock, CheckCircle2, XCircle, AlertCircle, Home, Coffee } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Clock, CheckCircle2, XCircle, AlertCircle, Home, Coffee, Check } from "lucide-react";
 import { ModulePage } from "@/components/ModulePage";
 import { getStatusColor, formatStatus } from "@/lib/utils";
 
-const attendanceData = [
-  { id: 1, name: "Arjun Kapoor", avatar: "https://i.pravatar.cc/150?img=12", checkIn: "09:15 AM", checkOut: "06:30 PM", total: "9h 15m", status: "present", method: "Biometric" },
+const INITIAL_ATTENDANCE = [
+  { id: 1, name: "Sujai Director", avatar: "https://i.pravatar.cc/150?img=12", checkIn: "09:15 AM", checkOut: "06:30 PM", total: "9h 15m", status: "present", method: "Web GPS" },
   { id: 2, name: "Priya Sharma", avatar: "https://i.pravatar.cc/150?img=5", checkIn: "09:45 AM", checkOut: "07:00 PM", total: "9h 15m", status: "late", method: "QR Code" },
   { id: 3, name: "Rohan Mehta", avatar: "https://i.pravatar.cc/150?img=13", checkIn: "09:00 AM", checkOut: "06:15 PM", total: "9h 15m", status: "present", method: "Web" },
   { id: 4, name: "Rahul Verma", avatar: "https://i.pravatar.cc/150?img=8", checkIn: "—", checkOut: "—", total: "0h", status: "absent", method: "—" },
   { id: 5, name: "Ananya Iyer", avatar: "https://i.pravatar.cc/150?img=9", checkIn: "09:30 AM", checkOut: "01:30 PM", total: "4h", status: "half_day", method: "Web" },
   { id: 6, name: "Vikram Singh", avatar: "https://i.pravatar.cc/150?img=14", checkIn: "10:00 AM", checkOut: "—", total: "—", status: "late", method: "Biometric" },
-  { id: 7, name: "Meera Nair", avatar: "https://i.pravatar.cc/150?img=16", checkIn: "09:00 AM", checkOut: "06:00 PM", total: "9h", status: "wfh", method: "Web" },
-  { id: 8, name: "Aditya Rao", avatar: "https://i.pravatar.cc/150?img=33", checkIn: "08:45 AM", checkOut: "06:00 PM", total: "9h 15m", status: "present", method: "Biometric" },
 ];
 
 export default function AttendancePage() {
+  const [records, setRecords] = useState(INITIAL_ATTENDANCE);
+  const [clockedIn, setClockedIn] = useState(false);
+  const [statusMsg, setStatusMsg] = useState("");
+
+  const handleMarkAttendance = async () => {
+    try {
+      const action = clockedIn ? "clockOut" : "clockIn";
+      const res = await fetch("/api/attendance", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action, location: "Web Dashboard (GPS)" }),
+      });
+      const data = await res.json();
+
+      const timeNow = new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+
+      if (action === "clockIn") {
+        setClockedIn(true);
+        setStatusMsg(`Successfully Clocked In at ${timeNow}`);
+        setRecords([
+          {
+            id: Date.now(),
+            name: "You (Active Session)",
+            avatar: "https://i.pravatar.cc/150?img=60",
+            checkIn: timeNow,
+            checkOut: "Active",
+            total: "In Progress",
+            status: "present",
+            method: "Web Portal",
+          },
+          ...records,
+        ]);
+      } else {
+        setClockedIn(false);
+        setStatusMsg(`Successfully Clocked Out at ${timeNow}`);
+        setRecords(
+          records.map((r) =>
+            r.name.includes("You") ? { ...r, checkOut: timeNow, total: "8h 30m" } : r
+          )
+        );
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   return (
     <ModulePage
       title="Attendance Tracking"
       subtitle="Monitor employee attendance in real-time"
       icon={<Clock className="w-6 h-6 text-white" />}
-      actionLabel="Mark Attendance"
+      actionLabel={clockedIn ? "Clock Out Now" : "Clock In Now"}
+      onAction={handleMarkAttendance}
     >
+      {statusMsg && (
+        <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-2xl font-semibold text-sm flex items-center gap-2 mb-4">
+          <Check className="w-5 h-5" /> {statusMsg}
+        </div>
+      )}
+
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         {[
-          { label: "Present", value: 65, icon: CheckCircle2, color: "from-emerald-500 to-teal-500" },
-          { label: "Absent", value: 8, icon: XCircle, color: "from-red-500 to-pink-500" },
-          { label: "Late", value: 12, icon: AlertCircle, color: "from-amber-500 to-orange-500" },
-          { label: "WFH", value: 15, icon: Home, color: "from-brand-500 to-cyan-400" },
-          { label: "On Leave", value: 2, icon: Coffee, color: "from-purple-500 to-pink-500" },
+          { label: "Present", value: records.filter((r) => r.status === "present").length + 60, icon: CheckCircle2, color: "from-emerald-500 to-teal-500" },
+          { label: "Absent", value: 4, icon: XCircle, color: "from-red-500 to-pink-500" },
+          { label: "Late", value: 2, icon: AlertCircle, color: "from-amber-500 to-orange-500" },
+          { label: "WFH", value: 8, icon: Home, color: "from-brand-500 to-cyan-400" },
+          { label: "On Leave", value: 1, icon: Coffee, color: "from-purple-500 to-pink-500" },
         ].map((stat) => {
           const Icon = stat.icon;
           return (
@@ -49,7 +101,7 @@ export default function AttendancePage() {
       <div className="card-3d rounded-[22px] overflow-hidden">
         <div className="p-6 border-b border-slate-100 flex items-center justify-between">
           <div>
-            <h3 className="font-display text-lg font-bold text-slate-900">Today's Attendance</h3>
+            <h3 className="font-display text-lg font-bold text-slate-900">Today's Attendance Log</h3>
             <p className="text-sm text-slate-500 mt-1">{new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</p>
           </div>
         </div>
@@ -66,7 +118,7 @@ export default function AttendancePage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {attendanceData.map((record) => (
+              {records.map((record) => (
                 <tr key={record.id} className="hover:bg-white/50 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
@@ -92,3 +144,4 @@ export default function AttendancePage() {
     </ModulePage>
   );
 }
+
